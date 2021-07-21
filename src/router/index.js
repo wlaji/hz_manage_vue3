@@ -1,25 +1,82 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
+import {createRouter, createWebHistory} from 'vue-router'
+//引入在axios暴露出的clearPending函数
+import {clearPending} from "@/utils/request"
+import Utils from '@/utils/util'
 
 const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
-]
+    {
+        path: '/',
+        name: 'Home',
+        component: () => import(/* webpackChunkName: "Home" */ '../views/home.vue'),
+        children: [
+            {
+                path: '',
+                name: 'SystemHome',
+                component: () => import(/* webpackChunkName: "SystemHome" */ '../views/systemHome.vue')
+            },
+            {
+                path: 'set',
+                name: 'Set',
+                component: () => import(/* webpackChunkName: "Set" */ '../views/set/index.vue'),
+                redirect: {
+                    name: 'SiteSet'
+                },
+                children: [
+                    {
+                        path: 'siteSet',
+                        name: 'SiteSet',
+                        component: () => import(/* webpackChunkName: "SiteSet" */ '../views/set/siteSet.vue')
+                    },
+                    {
+                        path: 'businessSet',
+                        name: 'BusinessSet',
+                        component: () => import(/* webpackChunkName: "BusinessSet" */ '../views/set/businessSet.vue')
+                    },
+                ]
+            },
+        ]
+    },
+    {
+        path: '/login',
+        name: 'Login',
+        component: () => import(/* webpackChunkName: "Login" */ '../views/login.vue')
+    },
+    {
+        path: "/404",
+        name: "404",
+        component: () => import(/* webpackChunkName: "404" */ '../views/errorPage/404.vue')
+    },
+    {path: "/:pathMatch(.*)*", redirect: "/404"}
+];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes
-})
+    history: createWebHistory(process.env.BASE_URL),
+    routes
+});
+
+const whiteList = ['/login'];
+router.beforeEach((to, from, next) => {
+    //在跳转路由之前，先清除所有的请求
+    clearPending();
+    let token = Utils.getCookie('token');
+    //路由跳转逻辑:如果不存再token,去其他页面跳转到登录页,如果存在token去往登陆页跳转到首页
+    if (!token) {
+        if (whiteList.indexOf(to.path) >= 0) {
+            next();
+        } else {
+            router.replace('/login');
+        }
+    } else {
+        if (to.path === '/login') {
+            router.replace('/')
+        } else {
+            if (to.matched.length) {
+                next();
+            } else {
+                router.replace('/login')
+            }
+        }
+    }
+});
 
 export default router
