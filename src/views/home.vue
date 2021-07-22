@@ -28,6 +28,7 @@
                         <el-menu-item-group title="基本设置">
                             <el-menu-item index="SiteSet">网站设置</el-menu-item>
                             <el-menu-item index="BusinessSet">业务设置</el-menu-item>
+                            <el-menu-item index="SingleManage">单页管理</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
                     <el-submenu index="ContactUs">

@@ -32,6 +32,11 @@ const routes = [
                         name: 'BusinessSet',
                         component: () => import(/* webpackChunkName: "BusinessSet" */ '../views/set/businessSet.vue')
                     },
+                    {
+                        path: 'singleManage',
+                        name: 'SingleManage',
+                        component: () => import(/* webpackChunkName: "SingleManage" */ '../views/set/singleManage.vue')
+                    },
                 ]
             },
         ]
