@@ -37,8 +37,7 @@
                             <span>客服服务</span>
                         </template>
                         <el-menu-item-group title="基本服务">
-                            <el-menu-item index="3-1">服务1</el-menu-item>
-                            <el-menu-item index="3-2">服务2</el-menu-item>
+                            <el-menu-item index="Service1">服务1</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
                 </el-menu>

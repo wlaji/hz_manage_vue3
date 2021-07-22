@@ -39,6 +39,21 @@ const routes = [
                     },
                 ]
             },
+            {
+                path: 'service',
+                name: 'Service',
+                component: () => import(/* webpackChunkName: "Service" */ '../views/service/index.vue'),
+                redirect: {
+                    name: 'Service1'
+                },
+                children: [
+                    {
+                        path: 'service1',
+                        name: 'Service1',
+                        component: () => import(/* webpackChunkName: "Service1" */ '../views/service/service1.vue')
+                    },
+                ]
+            },
         ]
     },
     {
@@ -63,25 +78,26 @@ const whiteList = ['/login'];
 router.beforeEach((to, from, next) => {
     //在跳转路由之前，先清除所有的请求
     clearPending();
-    let token = Utils.getCookie('token');
-    //路由跳转逻辑:如果不存再token,去其他页面跳转到登录页,如果存在token去往登陆页跳转到首页
-    if (!token) {
-        if (whiteList.indexOf(to.path) >= 0) {
-            next();
-        } else {
-            router.replace('/login');
-        }
-    } else {
-        if (to.path === '/login') {
-            router.replace('/')
-        } else {
-            if (to.matched.length) {
-                next();
-            } else {
-                router.replace('/login')
-            }
-        }
-    }
+    next()
+    // let token = Utils.getCookie('token');
+    // //路由跳转逻辑:如果不存再token,去其他页面跳转到登录页,如果存在token去往登陆页跳转到首页
+    // if (!token) {
+    //     if (whiteList.indexOf(to.path) >= 0) {
+    //         next();
+    //     } else {
+    //         router.replace('/login');
+    //     }
+    // } else {
+    //     if (to.path === '/login') {
+    //         router.replace('/')
+    //     } else {
+    //         if (to.matched.length) {
+    //             next();
+    //         } else {
+    //             router.replace('/login')
+    //         }
+    //     }
+    // }
 });
 
 export default router
