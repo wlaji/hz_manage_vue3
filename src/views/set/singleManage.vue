@@ -13,7 +13,8 @@
                             <span>{{ item.pageName }}</span>
                             <span>
                                 <i class="el-icon-edit text-primary" title="编辑页面" @click="editPage(item)"></i>
-                                <i class="el-icon-delete ml-2" style="color:red" title="删除页面" @click="deletePage(item)"></i>
+                                <i class="el-icon-delete ml-2" style="color:red" title="删除页面"
+                                   @click="deletePage(item)"></i>
                             </span>
                         </li>
                     </ul>
@@ -57,10 +58,9 @@
 <script>
 import {defineComponent, onMounted, reactive, toRefs, unref} from "vue";
 import {SingleApi} from '@/api/single'
-import {ConfigApi} from '@/api/config'
 import {ElMessage, ElMessageBox} from "element-plus";
 import Editor from '@tinymce/tinymce-vue'
-import {NavApi} from "@/api/nav";
+import {UploadApi} from "@/api/upload";
 
 export default defineComponent({
     name: "singleManage",
@@ -73,6 +73,17 @@ export default defineComponent({
                 {required: true, message: '请输入页面名称', trigger: 'blur'},
             ],
         };
+        const handleImgUpload = function (blobInfo, success, failure) {
+            console.log(blobInfo)
+            let formData = new FormData();
+            formData.append('file', blobInfo.blob())
+            UploadApi.uploadFile(formData).then(res => {
+                const url = res.data
+                success(url)
+            }).catch(err => {
+                failure('上传失败')
+            })
+        }
         const state = reactive({
             tinyApiKey: 'cq62jh23yyvvxs4idil4zae2oxr774hszakvzwb7ab35lyk6',
             tinymceInit: {
@@ -93,7 +104,11 @@ export default defineComponent({
                 paste_webkit_styles: true,
                 //    上传方式1：填写images_upload_url和images_upload_base_path
                 paste_data_images: true,  //  设置为允许粘帖图片
-                images_upload_url: '/upload/file/tinymce', //  图片上传地址
+                // images_upload_url: '/upload/file/tinymce', //  图片上传地址
+                images_upload_handler: (blobInfo, success, failure) => {
+                    handleImgUpload(blobInfo, success, failure)
+                },
+                image_prepend_url: process.env.VUE_APP_URL + '/file/image',
                 contextmenu: `inserttable | cell row column deletetable`,
                 relative_urls: false,
                 remove_script_host: false,
@@ -115,7 +130,7 @@ export default defineComponent({
         const addPage = function () {
             clearPageVisible()
         };
-        const deletePage = function(data){
+        const deletePage = function (data) {
             ElMessageBox.confirm('此操作将删除此页面, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -123,7 +138,7 @@ export default defineComponent({
             }).then(() => {
                 //调用删除接口
                 SingleApi.deletePageById({
-                    id:data.id
+                    id: data.id
                 }).then(() => {
                     clearPageVisible();
                     ElMessage.success('删除成功');

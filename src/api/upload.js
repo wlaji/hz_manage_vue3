@@ -1,7 +1,7 @@
 
 import request from "@/utils/request";
 
-export const uploadApi = {
+export const UploadApi = {
     uploadFile(params){
         return request({
             url: '/file/upload',

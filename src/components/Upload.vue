@@ -1,7 +1,7 @@
 <template>
     <div class="uploadWrap d-flex flex-wrap">
-        <div class="uploadList" v-for="(item,index) in imgList" :key="index">
-            <img :src="item"/>
+        <div class="uploadList" v-for="(item,index) in filterImgList" :key="index">
+            <img :src="VUE_APP_URL+'/file/image'+item"/>
             <a href="javascript:;" class="deleteImg" @click="removeImg(index)">删除{{ imgList.length }}</a>
         </div>
         <div class="uploadList pointer">
@@ -15,16 +15,25 @@
 </template>
 
 <script>
-import {defineComponent, ref, unref} from "vue";
+import {defineComponent, ref, unref, computed} from "vue";
 import {ElMessage} from 'element-plus'
-import {uploadApi} from '@/api/upload'
+import {UploadApi} from '@/api/upload'
 
 export default defineComponent({
     props: ['imgList', 'isSingle'],
     setup(props, {emit}) {
+        const VUE_APP_URL = process.env.VUE_APP_URL
+        const filterImgList = computed(() => {
+            if (typeof props.imgList === 'string') {
+                return props.imgList ? [props.imgList] : []
+            } else {
+                return props.imgList
+            }
+        })
+        console.log(filterImgList)
         const uploadInput = ref(null);
         const upImg = function (event) {
-            if (props.imgList && props.imgList.length >= 1 && props.isSingle) {
+            if (filterImgList.value && filterImgList.value.length >= 1 && props.isSingle) {
                 ElMessage.warning('只能传单张图片');
                 return
             }
@@ -34,10 +43,10 @@ export default defineComponent({
             }
             let formData = new FormData();
             formData.append('file', files[0])
-            uploadApi.uploadFile(formData).then(res => {
+            UploadApi.uploadFile(formData).then(res => {
                 //创建base64图片
                 // createImage(files[0]);
-                const url = process.env.VUE_APP_URL + '/file/image' + res.data
+                const url = res.data
                 emit('addImg', url);
             }).catch(err => {
                 console.log(err)
@@ -64,7 +73,9 @@ export default defineComponent({
             upImg,
             triggerUpload,
             uploadInput,
-            removeImg
+            removeImg,
+            filterImgList,
+            VUE_APP_URL
         }
     }
 });

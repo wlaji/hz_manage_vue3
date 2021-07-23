@@ -10,12 +10,12 @@
                 </template>
                 <template v-if="item.configName === 'banner'">
                     <label>网站logo:</label>
-                    <Upload :imgList="JSON.parse(item.keyValue)" :isSingle="true" @deleteImg="deleteImg($event,item)" @addImg="addImg($event,item)"></Upload>
+                    <Upload :imgList="item.keyValue" :isSingle="true" @deleteImg="deleteLogo($event,item)" @addImg="addLogo($event,item)"></Upload>
                     <el-button type="primary" class="ml-2" @click="save(item)">保存</el-button>
                 </template>
                 <template v-if="item.configName === 'carousel'">
                     <label>轮播图片列表:</label>
-                    <Upload :imgList="JSON.parse(item.keyValue)" @deleteImg="deleteImg($event,item)" @addImg="addCarouse($event,item)"></Upload>
+                    <Upload :imgList="JSON.parse(item.keyValue)" @deleteImg="deleteCarousel($event,item)" @addImg="addCarouse($event,item)"></Upload>
                     <el-button type="primary" class="ml-2" @click="save(item)">保存</el-button>
                 </template>
             </div>
@@ -146,18 +146,16 @@ export default defineComponent({
             state.navForm['url'] = url;
             state.navVisible = true
         };
-        //删除logo
-        const deleteImg = function (index,item) {
+        const addLogo = function (url,item) {
+            item.keyValue = url
+        };
+        const deleteLogo = function(index,item){
+            item.keyValue = ''
+        };
+        const deleteCarousel = function (index,item) {
             const imgList = JSON.parse(item.keyValue)
             imgList.splice(index, 1)
             item.keyValue = JSON.stringify(imgList)
-        };
-        const addImg = function (url,item) {
-            item.keyValue = JSON.stringify([url])
-        };
-
-        const deleteCarousel = function () {
-
         };
         const addCarouse = function (url,item) {
             const imgList = JSON.parse(item.keyValue)||[]
@@ -227,14 +225,14 @@ export default defineComponent({
             appendNav,
             removeNav,
             editNav,
-            deleteImg,
-            addImg,
+            addLogo,
             handleCloseNavVisible,
             submitNavForm,
             navRules,
             deleteCarousel,
             addCarouse,
-            save
+            save,
+            deleteLogo
         }
     }
 
