@@ -10,7 +10,7 @@
                 <div class="pageListWrap">
                     <el-tree
                         class="flex-1"
-                        :data="navData"
+                        :data="pageList"
                         :props="{
                             label:'name',
                             children:'children'
@@ -19,12 +19,12 @@
                         node-key="1000"
                         :expand-on-click-node="false">
                         <template #default="{ node, data }">
-                        <span class="custom-tree-node">
+                        <span class="custom-tree-node d-flex justify-content-between align-items-center w-100">
                           <span>{{ node.label }}</span>
                           <div class="ml-3 d-inline-block">
-                              <a href="javascript:;" class="mx-1" @click="editNav(data)">Edit</a>
-                              <a href="javascript:;" class="mx-1" @click="appendNav(data)">Append</a>
-                              <a href="javascript:;" class="mx-1" @click="removeNav(node, data)">Delete</a>
+                              <a href="javascript:;" class="mx-1" @click="editPage(data)">Edit</a>
+                              <a href="javascript:;" class="mx-1" @click="addPage(data)">Append</a>
+                              <a href="javascript:;" class="mx-1" @click="removePage(node, data)">Delete</a>
                           </div>
                         </span>
                         </template>
@@ -33,7 +33,7 @@
             </div>
             <div class="col-8 content">
                 <div class="title px-2 d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">{{ pageForm.pageName ? pageForm.pageName : '添加新业务' }}</h3>
+                    <h3 class="mb-0">{{ pageForm.id?'编辑业务':'添加新业务' }}</h3>
                     <i class="el-icon-circle-plus-outline pointer" style="font-size:26px;font-weight: 600"
                        title="添加富文本"></i>
                 </div>
@@ -45,10 +45,10 @@
                         <el-form-item label="业务描述" prop="description">
                             <el-input type="textarea" v-model="pageForm.description"></el-input>
                         </el-form-item>
-                        <el-form-item label="业务Icon" prop="pic_path">
-                            <Upload :imgList="pageForm.pic_path" :isSingle="true"
-                                    @deleteImg="deleteImg($event,'pic_path')"
-                                    @addImg="addImg($event,'pic_path')"></Upload>
+                        <el-form-item label="业务Icon" prop="picPath">
+                            <Upload :imgList="pageForm.picPath" :isSingle="true"
+                                    @deleteImg="deleteImg($event,'picPath')"
+                                    @addImg="addImg($event,'picPath')"></Upload>
                         </el-form-item>
                         <el-form-item label="业务链接" prop="url">
                             <el-input v-model="pageForm.url"></el-input>
@@ -60,9 +60,9 @@
                         </el-form-item>
                         <el-form-item label="业务背景">
                             <el-switch v-model="pageForm.isPureColor" active-text="背景色(16进制)"
-                                       inactive-text="背景图"></el-switch>
+                                       inactive-text="背景图" :active-value="1" :inactive-value="0"></el-switch>
                             <Upload :imgList="pageForm.backgroundImg" :isSingle="true"
-                                    @deleteImg="deleteImg($event,'pic_path')"
+                                    @deleteImg="deleteImg($event,'picPath')"
                                     @addImg="addImg($event,'backgroundImg')"></Upload>
                             <el-input v-model="pageForm.backgroundColor" placeholder="背景色"></el-input>
                         </el-form-item>
@@ -94,6 +94,7 @@ import {ElMessage, ElMessageBox} from "element-plus";
 import Editor from '@tinymce/tinymce-vue'
 import {UploadApi} from "@/api/upload";
 import Upload from '@/components/Upload.vue'
+import {NavApi} from "@/api/nav";
 
 export default defineComponent({
     name: "siteSet",
@@ -151,7 +152,7 @@ export default defineComponent({
             pageForm: {
                 name: '',
                 description: '',
-                pic_path: '',
+                picPath: '',
                 url: '',
                 tdkJson: {
                     title: '',
@@ -170,19 +171,36 @@ export default defineComponent({
             }
         })
         const editPage = function (data) {
+            console.log(data)
             state.pageForm = JSON.parse(JSON.stringify(data))
+            const {id, name, description, picPath, url, tdkJson,content,isPureColor,background,navJson,backgroundImg,backgroundColor} = data;
+            state.pageForm['id'] = id;
+            state.pageForm['name'] = name;
+            state.pageForm['description'] = description;
+            state.pageForm['picPath'] = picPath;
+            state.pageForm['url'] = url;
+            state.pageForm['tdkJson'] = JSON.parse(tdkJson);
+            state.pageForm['content']=  content;
+            state.pageForm['isPureColor']=  isPureColor;
+            state.pageForm['background']=  background;
+            state.pageForm['navJson']=  {};
+            state.pageForm['backgroundImg']=  JSON.parse(navJson).backgroundImg;
+            state.pageForm['backgroundColor']=  JSON.parse(navJson).backgroundColor;
         };
-        const addPage = function () {
+        const addPage = function (data) {
             clearPageVisible()
+            if(data){
+                state.pageForm.parentId = data.id
+            }
         };
-        const deletePage = function (data) {
+        const removePage = function(node,data){
             ElMessageBox.confirm('此操作将删除此页面, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
                 //调用删除接口
-                SingleApi.deletePageById({
+                BusinessApi.deleteProfession({
                     id: data.id
                 }).then(() => {
                     clearPageVisible();
@@ -202,7 +220,7 @@ export default defineComponent({
             state.pageForm = {
                 name: '',
                 description: '',
-                pic_path: '',
+                picPath: '',
                 url: '',
                 tdkJson: {
                     title: '',
@@ -233,16 +251,22 @@ export default defineComponent({
             if (!form) return;
             form.validate().then(() => {
                 //添加页面
-                const postData = {
+                let postData = {
                     name: state.pageForm.name,
                     description: state.pageForm.description,
-                    pic_path: state.pageForm.pic_path,
+                    picPath: state.pageForm.picPath,
                     url: state.pageForm.url,
                     tdkJson: JSON.stringify(state.pageForm.tdkJson),
                     content: state.pageForm.content,
                     isPureColor: state.pageForm.isPureColor,
                     background: state.pageForm.background,
-                    navJson: JSON.stringify(state.pageForm.navJson),
+                    navJson: JSON.stringify({
+                        backgroundColor: state.pageForm.backgroundColor,
+                        backgroundImg: state.pageForm.backgroundImg,
+                    }),
+                }
+                if(state.pageForm.id){
+                    postData = Object.assign({},postData,{id:state.pageForm.id})
                 }
                 BusinessApi.editProfession(postData).then(() => {
                     clearPageVisible();
@@ -269,9 +293,9 @@ export default defineComponent({
             ...toRefs(state),
             editPage,
             addPage,
+            removePage,
             pageRules,
             submitPageForm,
-            deletePage,
             addImg,
             deleteImg
         }

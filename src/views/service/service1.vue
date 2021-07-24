@@ -97,7 +97,7 @@ export default defineComponent({
 
             //连接发生错误的回调方法
             websocket.onerror = function () {
-                console.log("aaa")
+                console.log("连接错误")
             };
 
             //连接成功建立的回调方法
@@ -111,26 +111,25 @@ export default defineComponent({
                         newChatBox.customName = oneBox.customName;
                         state.chatBoxList.push(newChatBox);
                     })
+                    console.log(state)
                 })
             };
 
             //接收到消息的回调方法
             websocket.onmessage = function (event) {
                 let object = eval("(" + event.data + ")");
-                console.log(object);
                 if (object.type == 0) {
                     // 提示连接成功
                     console.log("连接成功");
-                    let newChatBox = JSON.parse(JSON.stringify(that.chatBox));
+                    let newChatBox = JSON.parse(JSON.stringify(state.chatBox));
                     newChatBox.customSessionId = object.aisle;
                     newChatBox.customName = object.name;
-                    that.chatBoxList.push(newChatBox);
-                    that.showInfo(object.people, object.aisle);
+                    state.chatBoxList.push(newChatBox);
                 }
                 if (object.type == 1) {
                     //显示消息
                     console.log("接受消息", object);
-                    let aa = that.chatBoxList.filter(chatBox =>
+                    let aa = state.chatBoxList.filter(chatBox =>
                         chatBox.customSessionId === object.customSessionId
                     )
                     if (aa.length) {
@@ -138,24 +137,15 @@ export default defineComponent({
                     }
                 }
             };
-
-            //连接关闭的回调方法
-            websocket.onclose = function () {
-
-            };
         }
         // 发送消息
         const sendMessage = function (chat) {
-            var socketMsg = {msg: chat.sendMessage, toUser: chat.customSessionId};
-            socketMsg.type = 1;
-            this.websocket.send(JSON.stringify(socketMsg));
-        }
-        const showInfo = function (people, aisle) {
-            this.$notify({
-                title: "当前在线人数：" + people,
-                message: "您的频道号：" + aisle,
-                duration: 0
-            });
+            let socketMsg = {
+                msg: chat.sendMessage,
+                toUser: chat.customSessionId,
+                type:1
+            };
+            websocket.send(JSON.stringify(socketMsg));
         }
         onMounted(() => {
             connectWebSocket()
