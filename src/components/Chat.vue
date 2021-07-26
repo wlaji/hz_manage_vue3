@@ -5,8 +5,8 @@
                 <div class="h-100 chatListWrap">
                     <el-scrollbar>
                         <ul class="chatList">
-                            <li v-for="(item,index) in chatBoxList" :key="index" class="d-flex align-items-center pl-2"
-                                @click="selectUser(index)" :class="{active:item.customSessionId ===selectChat.customSessionId}">
+                            <li v-for="(item,index) in chatBoxList" :key="index" class="d-flex align-items-center"
+                                @click="selectUser(index)">
                                 <el-avatar icon="el-icon-user-solid"></el-avatar>
                                 <span class="ml-2">{{ item.customName }}{{index+1}}</span>
                             </li>
@@ -20,21 +20,14 @@
                         <!--</div>-->
                         <div class="con flex-1" style="height:0;">
                             <el-scrollbar>
-                                <ul class="messageList">
-                                    <li class="clearfix mb-2" v-for="(value,index) in selectChat.messageList" :key="index">
-                                        <div v-if="value.name=='客服00'+serviceId" class="message myMessage">
-                                            <div style="word-break: break-word" v-html="value.msg" class="mr-1 info">
-
-                                            </div>
-                                            <el-avatar class="flex-shrink-0">我</el-avatar>
-                                        </div>
-                                        <div v-if="value.name!='客服00'+serviceId" class="message userMessage">
-                                            <el-avatar class="flex-shrink-0">{{value.name}}</el-avatar>
-                                            <div style="word-break: break-word" v-html="value.msg" class="ml-1 info">
-
-                                            </div>
-                                        </div>
-                                    </li>
+                                <ul class="messageList" v-for="(value,index) in selectChat.messageList" :key="index">
+                                    <el-tag v-if="value.name=='客服00'+serviceId" type="success" style="float:right">
+                                        我：<span v-html="value.msg"></span>
+                                    </el-tag>
+                                    <br/>
+                                    <el-tag v-if="value.name!='客服00'+serviceId" style="float:left">
+                                        {{value.name}}：<span v-html="value.msg"></span>
+                                    </el-tag>
                                     <br/>
                                 </ul>
                             </el-scrollbar>
@@ -64,7 +57,7 @@
     import Utils from '@/utils/util'
 
     export default defineComponent({
-        name: "service1",
+        name: "chat",
         setup() {
             const router = useRouter();
             let serviceName = Utils.getCookie('userInfo') ? JSON.parse(Utils.getCookie('userInfo')).userName : '客服和正';// 昵称
@@ -241,42 +234,13 @@
         height: 100%;
 
         .chatArea {
-            background-color: #f3f3f3;
+            padding: 10px;
+
             .header {
                 height: 40px;
                 line-height: 40px;
                 background-color: #E7E7E7;
                 text-align: center;
-            }
-
-            .messageList {
-                padding: 10px;
-                .myMessage {
-                    justify-content: flex-end;
-                    float: right;
-                    .info {
-                        background-color: lightgreen;
-                    }
-                }
-                .userMessage {
-                    justify-content: flex-start;
-                    float: left;
-                    .info {
-                        background-color: #fff;
-                    }
-                }
-                .message {
-                    width: calc(100% - 44px);
-                    display: flex;
-                    align-items: flex-start;
-                    .info {
-                        font-size: 14px;
-                        min-height: 40px;
-                        padding:10px;
-                        border-radius: 4px;
-                        line-height: 1.8;
-                    }
-                }
             }
         }
 

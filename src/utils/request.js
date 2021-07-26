@@ -1,13 +1,13 @@
 import axios from 'axios'
 import qs from 'qs'
 import Utils from '@/utils/util'
-import {ElMessage} from 'element-plus';
+import {ElMessage, ElMessageBox} from 'element-plus';
 import router from '@/router/index'
 
 // 创建axios实例
 const service = axios.create({
-    baseURL: process.env.NODE_ENV === 'development' ? '/api' : 'https://sticker-api.gs-souvenir.com',
-    timeout: 100000,
+    baseURL: process.env.NODE_ENV === 'development' ? '/api' : '/api',
+    timeout: 5000,
     transformRequest: [(data) => {
         data = JSON.stringify(data);
         return data
@@ -93,14 +93,18 @@ service.interceptors.response.use(
         removePending(res); // 在请求结束后，移除本次请求
         //code 后台响应代码
         const code = res.data.code;
-        if(res.status===200){
-            if(code === 200){
+        if (res.status === 200) {
+            if (code === 401) {
+                Utils.removeCookie('token');
+                Utils.removeCookie('userInfo');
+                location.reload()
+            } else if (code === 200) {
                 return res.data
-            }else{
-                ElMessage.error(res.data.message)
+            } else {
+                ElMessage.error(res.data.message);
                 return Promise.reject(res.data.message)
             }
-        }else{
+        } else {
             return Promise.reject(res.data.message)
         }
     },

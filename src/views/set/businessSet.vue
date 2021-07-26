@@ -169,9 +169,8 @@ export default defineComponent({
                 backgroundImg: '',
                 backgroundColor: '',
             }
-        })
+        });
         const editPage = function (data) {
-            console.log(data)
             state.pageForm = JSON.parse(JSON.stringify(data))
             const {id, name, description, picPath, url, tdkJson,content,isPureColor,background,navJson,backgroundImg,backgroundColor} = data;
             state.pageForm['id'] = id;
@@ -188,7 +187,7 @@ export default defineComponent({
             state.pageForm['backgroundColor']=  JSON.parse(navJson).backgroundColor;
         };
         const addPage = function (data) {
-            clearPageVisible()
+            clearPageVisible();
             if(data){
                 state.pageForm.parentId = data.id
             }
@@ -264,9 +263,12 @@ export default defineComponent({
                         backgroundColor: state.pageForm.backgroundColor,
                         backgroundImg: state.pageForm.backgroundImg,
                     }),
-                }
+                };
                 if(state.pageForm.id){
                     postData = Object.assign({},postData,{id:state.pageForm.id})
+                }
+                if(state.pageForm.parentId){
+                    postData = Object.assign({},postData,{parentId:state.pageForm.parentId})
                 }
                 BusinessApi.editProfession(postData).then(() => {
                     clearPageVisible();

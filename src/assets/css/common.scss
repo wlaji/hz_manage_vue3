@@ -1161,3 +1161,9 @@ html {
 .pointer{
   cursor: pointer;
 }
+
+.clearfix::after {
+  display: block;
+  clear: both;
+  content: "";
+}

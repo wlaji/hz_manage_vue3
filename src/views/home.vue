@@ -1,5 +1,6 @@
 <template>
     <el-container class="pageWrap">
+
         <el-aside class="left-aside">
             <el-scrollbar class="leftScrollBar">
                 <div class="sidebar-logo-container">
@@ -92,13 +93,13 @@
             const router = useRouter();
             const route = useRoute();
             const defaultActiveNav = route.name;
-            const userName = sessionStorage.getItem('userInfo') ? JSON.parse(sessionStorage.getItem('userInfo')).userName : '用户名';
+            const userName = Utils.getCookie('userInfo')?JSON.parse(Utils.getCookie('userInfo')).userName:'用户名';
             const handleCommand = function (command) {
                 switch (command) {
                     case 'logOut':
                         //退出登录逻辑
                         Utils.removeCookie('token');
-                        sessionStorage.removeItem('userInfo');
+                        Utils.removeCookie('userInfo');
                         router.push('/login');
                         break
                 }

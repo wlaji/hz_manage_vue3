@@ -50,7 +50,7 @@
                         const token = res.data.token;
                         const userInfo = res.data.userInfo;
                         Utils.setCookie('token',token,1);
-                        sessionStorage.setItem('userInfo',JSON.stringify(userInfo));
+                        Utils.setCookie('userInfo',userInfo);
                         router.push('/')
                     }).catch(err=>{
                         console.log(err)

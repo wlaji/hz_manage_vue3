@@ -1,6 +1,7 @@
 <template>
     <div>
         <el-button type="primary" @click="connectService">联系我们</el-button>
+        <el-button type="primary" @click="connectClose">断开连接</el-button>
         <el-dialog
             title="发送留言"
             v-model="visible"
@@ -8,9 +9,9 @@
             <div>
                 <div class="message" style="height:500px;overflow: auto">
                     <div v-for="(value,key,index) in messageList" :key="index">
-                        <el-tag v-if="value.name==name" type="success" style="float:right">我：{{ value.msg }}</el-tag>
+                        <el-tag v-if="value.name=='User'" type="success" style="float:right">我：{{ value.msg }}</el-tag>
                         <br/>
-                        <el-tag v-if="value.name!=name" style="float:left">{{ value.name }}：{{ value.msg }}</el-tag>
+                        <el-tag v-if="value.name!='User'" style="float:left">{{ value.name }}：{{ value.msg }}</el-tag>
                         <br/>
                     </div>
                 </div>
@@ -34,9 +35,9 @@ import {defineComponent, onUnmounted, reactive, toRefs} from "vue";
 export default defineComponent({
     name: "chat",
     setup() {
-        let serviceName = "User"// 昵称
-        let wsUrl = `ws://192.168.1.6:55505/websocket/custom?nickname=${serviceName}`
-        let websocket = null
+        let serviceName = "User";// 昵称
+        let wsUrl = `ws://121.40.112.169:55505/websocket/custom?nickname=${serviceName}`;
+        let websocket = null;
         const state = reactive({
             visible: false,
             name: "", // 昵称
@@ -45,7 +46,7 @@ export default defineComponent({
             messageList: [], // 消息列表
             messageValue: "", // 消息内容
             inputText: '',
-        })
+        });
         const connectWebSocket = function () {
             //判断当前浏览器是否支持WebSocket
             if ("WebSocket" in window) {
@@ -65,7 +66,7 @@ export default defineComponent({
 
             //接收到消息的回调方法
             websocket.onmessage = function (event) {
-                console.log(event)
+                console.log(event);
                 let object = eval("(" + event.data + ")");
                 if (object.type === 0) {
                     // 提示连接成功
@@ -79,7 +80,7 @@ export default defineComponent({
             };
             //连接关闭的回调方法
             websocket.onclose = function (event) {
-                console.log(event)
+                console.log('客户端连接关闭',event)
             };
         };
         // 发送消息
@@ -92,9 +93,9 @@ export default defineComponent({
             websocket.send(JSON.stringify(socketMsg));
         };
         const connectService = function () {
-            state.visible = true
+            state.visible = true;
             connectWebSocket()
-        }
+        };
         const formatInput = function (str) {
             return str.replace(/\n/g, '<br/>')
         };
@@ -103,10 +104,13 @@ export default defineComponent({
                 state.inputText += "\n"; //换行
             } else if (e.keyCode === 13) {
                 console.log('发送消息:' + formatInput(e.target.value));
-                sendMessage()
+                sendMessage();
                 state.inputText = '';
                 e.preventDefault();//禁止回车的默认换行
             }
+        };
+        const connectClose =function(){
+            websocket.close()
         };
         //关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
         onUnmounted(() => {
@@ -114,13 +118,14 @@ export default defineComponent({
                 websocket.close()
             }
 
-        })
+        });
         return {
             ...toRefs(state),
             connectWebSocket,
             sendMessage,
             connectService,
-            enterInput
+            enterInput,
+            connectClose
         }
     }
 });
