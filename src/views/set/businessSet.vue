@@ -62,7 +62,7 @@
                             <el-switch v-model="pageForm.isPureColor" active-text="背景色(16进制)"
                                        inactive-text="背景图" :active-value="1" :inactive-value="0"></el-switch>
                             <Upload :imgList="pageForm.backgroundImg" :isSingle="true"
-                                    @deleteImg="deleteImg($event,'picPath')"
+                                    @deleteImg="deleteImg($event,'backgroundImg')"
                                     @addImg="addImg($event,'backgroundImg')"></Upload>
                             <el-input v-model="pageForm.backgroundColor" placeholder="背景色"></el-input>
                         </el-form-item>
