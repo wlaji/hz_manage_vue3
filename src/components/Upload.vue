@@ -1,7 +1,7 @@
 <template>
     <div class="uploadWrap d-flex flex-wrap">
         <div class="uploadList" v-for="(item,index) in filterImgList" :key="index">
-            <img :src="VUE_APP_URL+'/file/image'+item"/>
+            <img :src="item"/>
             <a href="javascript:;" class="deleteImg" @click="removeImg(index)">删除{{ imgList.length }}</a>
         </div>
         <div class="uploadList pointer">
@@ -46,7 +46,7 @@ export default defineComponent({
             UploadApi.uploadFile(formData).then(res => {
                 //创建base64图片
                 // createImage(files[0]);
-                const url = res.data
+                const url = VUE_APP_URL+'/file/image'+res.data;
                 emit('addImg', url);
             }).catch(err => {
                 console.log(err)

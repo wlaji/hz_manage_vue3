@@ -78,7 +78,7 @@ export default defineComponent({
             let formData = new FormData();
             formData.append('file', blobInfo.blob())
             UploadApi.uploadFile(formData).then(res => {
-                const url = res.data
+                const url = process.env.VUE_APP_URL + '/file/image' + res.data
                 success(url)
             }).catch(err => {
                 failure('上传失败')
